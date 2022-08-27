@@ -53,7 +53,7 @@ import { Request, Response } from "express";
       if (!isImageUrl(image_url)) return res.status(422).json({error:"Invalid Image URL. Url must end with any of .jpg, .png, .jpeg, .png, .webp, .avif, .gif, .svg"})
       
       // filter image
-      const filteredPath = await filterImageFromURL(image_url)
+      const filteredPath:string = await filterImageFromURL(image_url)
 
       // send the response & delete files on server
       return res.status(200).sendFile(filteredPath, async () => {
