@@ -37,3 +37,13 @@ export async function deleteLocalFiles(files: Array<string>) {
     fs.unlinkSync(file);
   }
 }
+
+// function to check if url is a valid url
+export function isUrl(url:string) {
+  return /^https?:\/\//.test(url);
+}
+
+// function to check if url is a valid image url
+export function isImageUrl(url:string) {
+  return /\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(url);
+}

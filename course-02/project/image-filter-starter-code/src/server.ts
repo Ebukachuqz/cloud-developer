@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import { filterImageFromURL, deleteLocalFiles, isImageUrl, isUrl } from './util/util';
+import { Request, Response } from "express"; 
 
 (async () => {
 
@@ -35,7 +36,33 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   // Displays a simple message to the user
   app.get( "/", async ( req, res ) => {
     res.send("try GET /filteredimage?image_url={{}}")
-  } );
+  });
+  
+  app.get("/filteredimage", async (req: Request, res: Response) => {
+    try {
+      // get image url from request query 
+      const { image_url } : { image_url:string } = req.query
+      
+      // validate the that the image url was passed in the request
+      if (!image_url) return res.status(422).json({ error: "please pass an image url in query" })
+
+      // Validate if it is a URL
+      if (!isUrl(image_url)) return res.status(422).json({ error: "Invalid URL. Url must beging with http:// or https://" })
+      
+      // Validate if it is an Image URL
+      if (!isImageUrl(image_url)) return res.status(422).json({error:"Invalid Image URL. Url must end with any of .jpg, .png, .jpeg, .png, .webp, .avif, .gif, .svg"})
+      
+      // filter image
+      const filteredPath = await filterImageFromURL(image_url)
+
+      // send the response & delete files on server
+      return res.status(200).sendFile(filteredPath, async () => {
+        await deleteLocalFiles([filteredPath])
+      })
+    } catch (error) {
+      return res.status(500).json({error:"sorry, something is wrong with the sever"})
+    }
+  })
   
 
   // Start the Server
